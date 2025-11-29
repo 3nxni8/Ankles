@@ -28,8 +28,8 @@ export const generateMetadata = async ({
 }: {
   params: Promise<{ id: string }>;
 }) => {
-  const { id } = await params;
-  // TODO:get the product from db
+  // TODO: Get the product from db using id
+  await params; // Consume params to satisfy Next.js
   // TEMPORARY
   return {
     title: product.name,
@@ -44,6 +44,8 @@ const ProductPage = async ({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ color: string; size: string }>;
 }) => {
+  // TODO: Get the product from db using id
+  await params; // Consume params to satisfy Next.js
   const { size, color } = await searchParams;
 
   const selectedSize = size || (product.sizes[0] as string);
