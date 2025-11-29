@@ -17,8 +17,12 @@ const useCartStore = create<CartStoreStateType & CartStoreActionsType>()(
           );
 
           if (existingIndex !== -1) {
-            const updatedCart = [...state.cart];
-            updatedCart[existingIndex].quantity += product.quantity || 1;
+            // Create a new array with a new object for the updated item (proper immutability)
+            const updatedCart = state.cart.map((item, index) =>
+              index === existingIndex
+                ? { ...item, quantity: item.quantity + (product.quantity || 1) }
+                : item
+            );
             return { cart: updatedCart };
           }
 
@@ -43,6 +47,16 @@ const useCartStore = create<CartStoreStateType & CartStoreActionsType>()(
                 p.selectedSize === product.selectedSize &&
                 p.selectedColor === product.selectedColor
               )
+          ),
+        })),
+      updateQuantity: (product, quantity) =>
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.id === product.id &&
+            item.selectedSize === product.selectedSize &&
+            item.selectedColor === product.selectedColor
+              ? { ...item, quantity }
+              : item
           ),
         })),
       clearCart: () => set({ cart: [] }),
