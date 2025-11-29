@@ -4,7 +4,7 @@ import useCartStore from "@/stores/cartStore";
 import { ProductType } from "@/types";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const ProductInteraction = ({
@@ -23,6 +23,8 @@ const ProductInteraction = ({
 
   const { addToCart } = useCartStore();
 
+  const isOutOfStock = product.stock <= 0;
+
   const handleTypeChange = (type: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(type, value);
@@ -31,7 +33,10 @@ const ProductInteraction = ({
 
   const handleQuantityChange = (type: "increment" | "decrement") => {
     if (type === "increment") {
-      setQuantity((prev) => prev + 1);
+      // Limit quantity to available stock
+      if (quantity < product.stock) {
+        setQuantity((prev) => prev + 1);
+      }
     } else {
       if (quantity > 1) {
         setQuantity((prev) => prev - 1);
@@ -40,91 +45,162 @@ const ProductInteraction = ({
   };
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addToCart({
       ...product,
       quantity,
       selectedColor,
       selectedSize,
     });
-    toast.success("Product added to cart")
+    toast.success("Product added to cart");
   };
+
   return (
     <div className="flex flex-col gap-4 mt-4">
       {/* SIZE */}
-      <div className="flex flex-col gap-2 text-xs">
-        <span className="text-gray-500">Size</span>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 text-sm">
+        <span className="text-gray-500 font-medium">Size</span>
+        <div className="flex flex-wrap items-center gap-2">
           {product.sizes.map((size) => (
-            <div
-              className={`cursor-pointer border-1 p-[2px] ${
-                selectedSize === size ? "border-gray-600" : "border-gray-300"
-              }`}
+            <button
+              type="button"
+              aria-label={`Select size ${size}`}
+              className={[
+                "min-w-[44px] min-h-[44px] px-3 py-2",
+                "border rounded-lg text-center",
+                "flex items-center justify-center",
+                "transition-all duration-200",
+                "cursor-pointer",
+                String(selectedSize) === String(size)
+                  ? "border-black bg-black text-white"
+                  : "border-gray-300 bg-white text-gray-800 hover:border-gray-500",
+              ].join(" ")}
               key={size}
               onClick={() => handleTypeChange("size", String(size))}
             >
-              <div
-                className={`w-6 h-6 text-center flex items-center justify-center ${
-                  selectedSize === size
-                    ? "bg-black text-white"
-                    : "bg-white text-black"
-                }`}
-              >
-                {String(size).toUpperCase()}
-              </div>
-            </div>
+              {String(size).toUpperCase()}
+            </button>
           ))}
         </div>
       </div>
+
       {/* COLOR */}
       <div className="flex flex-col gap-2 text-sm">
-        <span className="text-gray-500">Color</span>
-        <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-medium">Color</span>
+        <div className="flex flex-wrap items-center gap-3">
           {product.colors.map((color) => (
-            <div
-              className={`cursor-pointer border-1 p-[2px] ${
-                selectedColor === color ? "border-gray-300" : "border-white"
-              }`}
+            <button
+              type="button"
+              aria-label={`Select color ${color}`}
+              className={[
+                "min-w-[44px] min-h-[44px] p-1",
+                "rounded-full border-2",
+                "flex items-center justify-center",
+                "transition-all duration-200",
+                "cursor-pointer",
+                selectedColor === color
+                  ? "border-black"
+                  : "border-gray-200 hover:border-gray-400",
+              ].join(" ")}
               key={color}
               onClick={() => handleTypeChange("color", color)}
             >
-              <div className={`w-6 h-6`} style={{ backgroundColor: color }} />
-            </div>
+              <div
+                className="w-8 h-8 rounded-full"
+                style={{ backgroundColor: color }}
+              />
+            </button>
           ))}
         </div>
       </div>
-      {/* QUANTITY */}
+
+      {/* QUANTITY - HCI: Touch-friendly +/- buttons with B/W/G styling */}
       <div className="flex flex-col gap-2 text-sm">
-        <span className="text-gray-500">Quantity</span>
-        <div className="flex items-center gap-2">
+        <span className="text-gray-500 font-medium">Quantity</span>
+        <div className="flex items-center gap-3">
           <button
-            className="cursor-pointer border-1 border-gray-300 p-1"
+            type="button"
+            aria-label="Decrease quantity"
+            disabled={quantity <= 1}
+            className={[
+              "min-w-[48px] min-h-[48px]",
+              "border border-gray-300 rounded-lg",
+              "flex items-center justify-center",
+              "transition-all duration-200",
+              quantity <= 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-black hover:bg-gray-100 cursor-pointer",
+            ].join(" ")}
             onClick={() => handleQuantityChange("decrement")}
           >
-            <Minus className="w-4 h-4" />
+            <Minus className="w-5 h-5" />
           </button>
-          <span>{quantity}</span>
+          <span className="min-w-[40px] text-center text-lg font-medium">
+            {quantity}
+          </span>
           <button
-            className="cursor-pointer border-1 border-gray-300 p-1"
+            type="button"
+            aria-label="Increase quantity"
+            disabled={quantity >= product.stock || isOutOfStock}
+            className={[
+              "min-w-[48px] min-h-[48px]",
+              "border border-gray-300 rounded-lg",
+              "flex items-center justify-center",
+              "transition-all duration-200",
+              quantity >= product.stock || isOutOfStock
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-black hover:bg-gray-100 cursor-pointer",
+            ].join(" ")}
             onClick={() => handleQuantityChange("increment")}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
           </button>
+          {!isOutOfStock && (
+            <span className="text-xs text-gray-400 ml-2">
+              {product.stock} available
+            </span>
+          )}
         </div>
       </div>
-      {/* BUTTONS */}
+
+      {/* ACTION BUTTONS - B/W/G styling with touch-friendly sizes */}
       <button
+        type="button"
         onClick={handleAddToCart}
-        className="bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg flex items-center justify-center gap-2 cursor-pointer text-sm font-medium"
+        disabled={isOutOfStock}
+        className={[
+          "min-h-[52px] px-6 py-3",
+          "rounded-lg shadow-md",
+          "flex items-center justify-center gap-2",
+          "text-sm font-semibold",
+          "transition-all duration-200",
+          isOutOfStock
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-black text-white hover:bg-gray-800 cursor-pointer",
+        ].join(" ")}
       >
-        <Plus className="w-4 h-4" />
-        Add to Cart
+        <ShoppingCart className="w-5 h-5" />
+        {isOutOfStock ? "Out of Stock" : "Add to Cart"}
       </button>
-      <button className="ring-1 ring-gray-400 shadow-lg text-gray-800 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer gap-2 text-sm font-medium">
-        <ShoppingCart className="w-4 h-4" />
-        Buy this Item
+      <button
+        type="button"
+        disabled={isOutOfStock}
+        className={[
+          "min-h-[52px] px-6 py-3",
+          "ring-1 ring-gray-300 rounded-lg shadow-sm",
+          "flex items-center justify-center gap-2",
+          "text-sm font-semibold",
+          "transition-all duration-200",
+          isOutOfStock
+            ? "text-gray-400 cursor-not-allowed"
+            : "text-gray-800 hover:bg-gray-50 cursor-pointer",
+        ].join(" ")}
+      >
+        <ShoppingCart className="w-5 h-5" />
+        Buy Now
       </button>
     </div>
   );
 };
 
-export default ProductInteraction;
+export default React.memo(ProductInteraction);
