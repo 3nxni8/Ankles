@@ -35,7 +35,7 @@ export const HERO_CONTENT: HeroContent = {
     highlight: "Elevate your style",
     subtitle:
         "Discover limited-edition releases and essentials crafted with precision. Built for those who move different.",
-    primaryAction: { label: "Shop now", href: "/Products", ariaLabel: "Shop new arrivals" },
+    primaryAction: { label: "Shop New Drops", href: "/products", ariaLabel: "Shop new drops" },
     secondaryAction: { label: "Explore collections", href: "/about", ariaLabel: "Explore collections" },
     stats: [
         { label: "New drops", value: "Weekly" },
