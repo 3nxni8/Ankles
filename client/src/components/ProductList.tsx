@@ -1,3 +1,4 @@
+import React from "react";
 import { ProductsType } from "@/types";
 import Categories from "./Categories";
 import ProductCard from "./ProductCard";
@@ -151,7 +152,8 @@ const ProductList = ({ category, params }: { category: string, params: "homepage
 
             {params === "products" && <Filter />}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-12">
+            {/* HCI: Appropriate gaps between cards for visual hierarchy and smooth scrolling */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
                 {displayProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                 ))}
@@ -160,7 +162,7 @@ const ProductList = ({ category, params }: { category: string, params: "homepage
             {/* Show "View all" link only if we are on homepage or looking at a specific subset */}
             <Link
                 href={category ? `/products/?category=${category}` : "/products"}
-                className="flex justify-end mt-4 underline text-sm text-gray-500"
+                className="flex justify-end mt-6 underline text-sm text-gray-500 hover:text-black transition-colors"
             >
                 View all products
             </Link>
@@ -168,4 +170,4 @@ const ProductList = ({ category, params }: { category: string, params: "homepage
     );
 };
 
-export default ProductList;
+export default React.memo(ProductList);

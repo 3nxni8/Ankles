@@ -13,18 +13,22 @@ const product: ProductType = {
   price: 59.9,
   sizes: ["xs", "s", "m", "l", "xl"],
   colors: ["gray", "purple", "green"],
-  images: {
+  image: {
     gray: "/products/1g.png",
     purple: "/products/1p.png",
     green: "/products/1gr.png",
   },
+  category: "sneakers",
+  subCategory: "low-top",
+  stock: 10,
 };
 
 export const generateMetadata = async ({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) => {
+  const { id } = await params;
   // TODO:get the product from db
   // TEMPORARY
   return {
@@ -49,7 +53,7 @@ const ProductPage = async ({
       {/* IMAGE */}
       <div className="w-full lg:w-5/12 relative aspect-[2/3]">
         <Image
-          src={product.images[selectedColor]}
+          src={product.image[selectedColor]}
           alt={product.name}
           fill
           className="object-contain rounded-md"
