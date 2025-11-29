@@ -60,7 +60,7 @@ const ProductInteraction = ({
                 selectedSize === size ? "border-gray-600" : "border-gray-300"
               }`}
               key={size}
-              onClick={() => handleTypeChange("size", size)}
+              onClick={() => handleTypeChange("size", String(size))}
             >
               <div
                 className={`w-6 h-6 text-center flex items-center justify-center ${
@@ -69,7 +69,7 @@ const ProductInteraction = ({
                     : "bg-white text-black"
                 }`}
               >
-                {size.toUpperCase()}
+                {String(size).toUpperCase()}
               </div>
             </div>
           ))}
